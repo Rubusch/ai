@@ -3,6 +3,20 @@
 - Qwen3-coder:14B for 16GB VRAM
 [- Qwen3-coder:32B for 24GB VRAM]
 
+## Prepare
+make sure nvidia drivers are setup in the package manager
+```
+$ sudo apt update
+$ sudo apt install -y nvidia-container-toolkit
+$ sudo nvidia-ctk runtime configure --runtime=docker
+$ sudo systemctl restart docker
+```
+NVIDIA sanity checks for docker container
+```
+$ docker info | grep -i nvidia
+$ docker run --rm --gpus all nvidia/cuda:12.4.1-base-ubuntu22.04 nvidia-smi
+```
+
 ## Build
 ```
 $ docker build -t ollama-qwen .
