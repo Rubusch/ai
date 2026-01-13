@@ -4,7 +4,8 @@
 [- Qwen3-coder:32B for 24GB VRAM]
 
 ## Prepare
-make sure nvidia drivers are setup in the package manager
+make sure nvidia drivers are setup in the package manager, install the nvidia-container-toolkit
+ref: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
 ```
 $ sudo apt update
 $ sudo apt install -y nvidia-container-toolkit
@@ -25,21 +26,12 @@ $ docker build -t ollama-qwen .
 ## Usage
 NVIDIA, with auto-detect CUDA
 ```
-$ docker run -d \
-  --name ollama \
-  --gpus all \
-  -p 11434:11434 \
-  -v ollama-data:/root/.ollama \
-  ollama-qwen
+$ docker run -d --name ollama --gpus all -p 11434:11434 -v ollama-data:/root/.ollama ollama-qwen
 ```
 
 CPU only
 ```
-$ docker run -d \
-  --name ollama \
-  -p 11434:11434 \
-  -v ollama-data:/root/.ollama \
-  ollama-qwen
+$ docker run -d --name ollama -p 11434:11434 -v ollama-data:/root/.ollama ollama-qwen
 ```
 
 ## LLM Download
