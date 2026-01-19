@@ -54,6 +54,7 @@ then in browser
 http://localhost:3000
 ```
 
+# LLM
 ## LLM Download
 find available models here:
 https://www.ollama.com/
@@ -102,7 +103,8 @@ API access
 http://localhost:11434
 ```
 
-## Ollama Finetune
+# OLLAMA
+## OLLAMA Configuration
 What Ollama can do? Create derived models using Modelfiles:
 - system prompts
 - temperature
@@ -133,9 +135,72 @@ Real fine-tuning workflow (correct one)
 ```
 $ ollama create my-qwen -f Modelfile
 ```
-If someone tells you Ollama does end-to-end fine-tuning, they are confused.
 
-## Debugging
+# Neovim
+verify
+```
+curl http://localhost:11434/api/tags
+```
+
+installation
+```
+$ sudo apt install -y neovim
+$ mkdir -p ~/.config/nvim
+```
+setup config (in case paste with SHIFT+CTRL+v)
+- install lazy.nvim plugin manager
+- install gen.nvim and configure it to talk to ollama
+```
+$ nvim ~/.config/nvim/init.lua
+-- bootstrap lazy.nvim
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+  vim.fn.system({
+    "git",
+    "clone",
+    "--filter=blob:none",
+    "https://github.com/folke/lazy.nvim.git",
+    "--branch=stable",
+    lazypath,
+  })
+end
+vim.opt.rtp:prepend(lazypath)
+
+-- plugins
+require("lazy").setup({
+  {
+    "David-Kunz/gen.nvim",
+    config = function()
+      require("gen").setup({
+        model = "freehuntx/qwen3-coder:14b",
+        host = "localhost",
+        port = "11434",
+      })
+    end,
+  },
+})
+```
+start neovim, type `:Gen` to access the menu
+```
+$ nvim
+:Gen
+```
+test neovim on code, open a code file
+```
+$ nvim main.c
+```
+mark some lines
+```
+v
+```
+type `:` opens `:'<,'>` then type `Gen`, ENTER
+```
+:'<,'>Gen
+```
+- select `1` for `Ask`
+- type: `explain this code`
+
+# Troubleshooting
 ```
 $ docker logs ollama-webui
 ```
