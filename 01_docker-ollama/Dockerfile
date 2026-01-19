@@ -9,6 +9,7 @@ RUN apt-get update && apt-get install -y \
     ca-certificates \
     curl \
     gnupg \
+    zstd \
     libstdc++6 \
     && rm -rf /var/lib/apt/lists/*
 
