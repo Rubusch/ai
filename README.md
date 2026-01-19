@@ -61,7 +61,7 @@ https://www.ollama.com/
 
 [01/2026]: Given a focus on C/C++/Python/Rust for Zephyr RTOS, Linux kernel, U-boot with a limitation here of 20GB:
 - Primary pick: DevStral-Small-2 - strong code base reasoning + agentic tools + fits your GPU.
-- Alternative powerful option: Qwen3-Coder (quantized 30B/14B) - best on benchmarked code tasks, huge context helps Linux/U-boot code.
+- Alternative powerful option: Qwen3-Coder (quantized 30B) - best on benchmarked code tasks, huge context helps Linux/U-boot code.
 - Good fallback: Qwen2.5-Coder for lighter local tasks or quick iterations.
 
 list installed LLMs
@@ -76,7 +76,7 @@ $ docker exec ollama ollama list
 
 ```
 $ docker start ollama
-$ docker exec -it ollama ollama pull qwen3:14b
+$ docker exec -it ollama ollama pull qwen3:30b
 ```
 or, for particularly owned LLMs
 ```
@@ -88,11 +88,11 @@ The new model should appear in the above list. From webui, use the Model Selecto
 Start local container and shell access
 ```
 $ docker exec -it ollama bash
-$ ollama run freehuntx/qwen3-coder:14b
+$ ollama run qwen3-coder:30b
 ```
 or (TODO verify)
 ```
-$ docker exec -it ollama ollama run freehuntx/qwen3-coder:14b
+$ docker exec -it ollama ollama run qwen3-coder:30b
 ```
 then in browser
 ```
@@ -172,7 +172,7 @@ require("lazy").setup({
     "David-Kunz/gen.nvim",
     config = function()
       require("gen").setup({
-        model = "freehuntx/qwen3-coder:14b",
+        model = "qwen3-coder:30b",
         host = "localhost",
         port = "11434",
       })
