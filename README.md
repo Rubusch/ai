@@ -4,7 +4,7 @@ One OLLAMA container and on top a WebUi container for a web front-end.
 In this way, OLLAMA can be accessed directly in the shell or via API (for IDEs).
 The optional WebUI provides a web front-end for browser access.
 
-## Preparation
+# Preparation
 Make sure nvidia drivers are setup in the package manager, further install the `nvidia-container-toolkit`.
 ref: https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html
 ```
@@ -20,6 +20,7 @@ $ docker info | grep -i nvidia
 $ docker run --rm --gpus all nvidia/cuda:12.4.1-base-ubuntu22.04 nvidia-smi
 ```
 
+# Build
 ## Build OLLAMA Container
 ```
 $ cd ./01_docker-ollama/
@@ -28,6 +29,10 @@ $ cd ./01_docker-ollama/
 create the network
 ```
 01$ docker network create ollama-net
+```
+in case remove a stale container (started, but no network)
+```
+$ docker rm -f ollama
 ```
 
 ## Start OLLAMA Container
@@ -135,6 +140,46 @@ Real fine-tuning workflow (correct one)
 ```
 $ ollama create my-qwen -f Modelfile
 ```
+
+# Usage
+cleanup
+```
+$ docker stop ollama-webui
+$ docker stop ollama
+```
+
+clean persistence also
+```
+$ docker rm -f ollama
+$ docker rm -f ollama-webui
+```
+
+clean, reestablish network
+```
+$ docker network create ollama-net
+```
+
+start and configure to use up to 19GB (of 20GB) more aggressive usage, using 8192 (if instable alternatively try 6144)
+```
+01$ docker run -d --name ollama --network ollama-net --gpus all --shm-size=32g -e OLLAMA_GPU_OVERHEAD=1024 -e OLLAMA_NUM_PARALLEL=1 -e OLLAMA_CONTEXT_LENGTH=8192 -p 11434:11434 -v ollama-data:/root/.ollama ollama-local
+```
+then in 02 start the webUI
+```
+02$ docker run -d --name ollama-webui --network ollama-net -p 3000:8080 -e OLLAMA_BASE_URL=http://ollama:11434 ollama-webui
+```
+
+configure:
+- Context Length: 6144 (check this in the log)
+- `Max Tokens`: 10000 
+- `Temperature`: 0.2 – 0.3
+- `Top_p`: 0.9
+- `think (Ollama)`: Off (qwen3-code)
+- `num_ctx (Ollama)`: 8192 [2048]
+
+stability:
+- Parallel Requests: 1 (check in log)
+- Streaming: ON
+
 
 # Neovim
 verify
