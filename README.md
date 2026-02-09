@@ -75,7 +75,6 @@ $ docker exec ollama ollama list
     NAME                       ID              SIZE      MODIFIED     
     DevStral-Small-2:latest    24277f07f62d    15 GB     6 hours ago     
     qwen3-coder:30b            06c1097efce0    18 GB     6 hours ago     
-    qwen2.5-coder:14b          9ec8897f747e    9.0 GB    17 hours ago    
     qwen3:14b                  bdbd181c33f2    9.3 GB    18 hours ago
 ```
 
@@ -95,15 +94,15 @@ Start local container and shell access
 $ docker exec -it ollama bash
 $ ollama run qwen3-coder:30b
 ```
-or (TODO verify)
+or
 ```
 $ docker exec -it ollama ollama run qwen3-coder:30b
 ```
-then in browser
+access via WebUi in browser
 ```
 http://localhost:3000
 ```
-API access
+access via API in e.g. NeoVim
 ```
 http://localhost:11434
 ```
@@ -119,7 +118,7 @@ What Ollama can do? Create derived models using Modelfiles:
 Example Modelfile:
 ```
 $ vi ./Modelfile
-    FROM qwen3-coder:14b
+    FROM qwen3-coder:30b
     PARAMETER temperature 0.2
     SYSTEM "You are a strict C++ code reviewer."
 ```
@@ -181,7 +180,7 @@ stability:
 - Streaming: ON
 
 
-# Neovim
+# Neovim (a possible approach)
 verify
 ```
 curl http://localhost:11434/api/tags
