@@ -212,6 +212,12 @@ $ . ./aider-venv/bin/activate
     aider 0.86.2
 ```
 
+configure e.g. in .bashrc something like the following
+```
+...
+export OPENAI_API_BASE=http://localhost:11434
+```
+
 ### Aider Usage
 due to the alias, do
 ```
@@ -302,6 +308,28 @@ configure:
 stability:
 - Parallel Requests: 1 (check in log)
 - Streaming: ON
+
+## Sitting behind a firewall
+The OLLAMA server can be accessed within the LAN, also VPN tunneled connects
+work but in case need some forwarding setup.
+
+In case tunnel the needed ports out, then on the client the following needs to
+stay open:
+```
+$ ssh -N   -L 3000:<OLLAMA server IP>:3000   -L 11434:<OLLAMA server IP>:11434 user@<tunnel peer endpoint>
+```
+e.g the server is in a LAN having the IP 192.168.1.77/24, connecting to some
+server (having forwarding, MASQUERADING and routing set), which is VPN endpoint
+with IP, say, 192.168.7.3. Then the command on the local PC connecting to this
+server remotely is
+```
+$ ssh -N   -L 3000:192.168.1.77:3000   -L 11434:192.168.1.77:11434   user@192.168.7.3
+```
+
+verify OLLAMA is accessible
+```
+curl http://localhost:11434/api/tags
+```
 
 
 # Troubleshooting
