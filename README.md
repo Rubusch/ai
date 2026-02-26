@@ -198,53 +198,17 @@ type `:` opens `:'<,'>` then type `Gen`, ENTER
 
 # Application: Aider
 Setup semi-autonomous AI-agent tool.
-### Prepare Aider setup
-Aider needs explicitely `python3.11` (as of Feb-2026). I don't have older python than 3.12, if not just use `python3-venv`
-```
-$ sudo apt update
-$ sudo apt install -y build-essential curl git libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev libffi-dev liblzma-dev tk-dev
-```
-install pyenv, note: pyenv tells what to add to the PATH, IMHO put the adding to
-PATH under condition, if not you risk a growing PATH in some situations.
-```
-$ curl https://pyenv.run | bash
-$ vi ~/.bashrc
-...
-129 echo "set pyvenv environment"
-130 export PYENV_ROOT="$HOME/.pyenv"
-131 if [ "" = "$( echo ${PATH} | grep ${PYENV_ROOT} )" ]; then
-132   [[ -d $PYENV_ROOT/bin ]] && export PATH="$PYENV_ROOT/bin:$PATH"
-133   eval "$(pyenv init - bash)" 
-134 fi
-135 alias aider-venv='pyenv activate aider-venv'
-136 export OPENAI_API_BASE=http://localhost:11434
-```
-after re-initiating a shell, I install aider into `/opt/aider`
-```
-$ pyenv --version
-    pyenv 2.6.23
-$ pyenv install 3.11.8
-$ sudo mkdir -p /opt/aider
-$ sudo chown -R $(id -u):$(id -g) /opt/aider
-$ pyenv virtualenv 3.11.8 aider-venv
-$ ln -s ~/.pyenv/versions/aider-venv /opt/aider/aider-venv
-$ pyenv activate aider-venv
-(aider-venv)$
-```
+
 ### Install Aider setup
-structure for e.g. a zephyr project
 ```
-/data/z/github__docker__zephyr   (Zephyr repo)
-/opt/aider                       (Aider state)
-/home/user/.pyenv                (Python toolchain)
-/home/user/.venvs (if you prefer)
-```
-install the following
-```
-$ pyenv activate aider-venv
+$ sudo mkdir /opt/aider && sudo chown $(id -u):$(id -g) /opt/aider
+$ cd /opt/aider
+$ python3 -m venv aider-venv
+$ . ./aider-venv/bin/activate
 (aider-venv)$ pip install --upgrade pip setuptools wheel
-(aider-venv)$ pip install aider-chat
-(aider-venv)$ aider --version
+(aider-venv)$ pip install aider-install
+(aider-venv)$ aider-install
+(aider-venv)$ $ aider --version
     aider 0.86.2
 ```
 
@@ -268,6 +232,8 @@ Note, aider warns that `qwen3-coder:30b` is unknown to it, but fine to use anywa
 
 - Use '!' to do shell commands, e.g. `!ls -l` or `!pwd`
 - Go through the code interactively, add files / folders (sub-section of codes) 
+- `/add <file>` add files to the context
+- `/drop` drop all added files
 
 # Miscellaneous
 ## WebUI Configuration
