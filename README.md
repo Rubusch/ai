@@ -132,14 +132,11 @@ $ cd ./02_docker-webui/
 ```
 $ docker start ollama-webui
 ```
+![WebUI](pics/webui.png)
+
 -> **WebUI** is reachable in browser: http://localhost:3000
 
 # Application: Neovim
-verify
-```
-curl http://localhost:11434/api/tags
-```
-
 ### Neovim configuration
 setup config (in case paste with SHIFT+CTRL+v)
 - install lazy.nvim plugin manager
@@ -177,6 +174,10 @@ require("lazy").setup({
 
 ### Neovim usage
 start neovim, type `:Gen` to access the menu
+
+![NeoVim Gen](pics/neovim01.png)
+![NeoVim Prompt](pics/neovim02.png)
+
 ```
 $ nvim
 :Gen
@@ -219,27 +220,95 @@ export OPENAI_API_BASE=http://localhost:11434
 ```
 
 ### Aider Usage
-due to the alias, do
+ref: https://aider.chat/docs/
 ```
-$ aider-venv
+$ . /opt/aider/aider-venv/bin/activate
 (aider-venv)$ cd /data/z/github__docker__zephyr/docker/zephyrproject
 (aider-venv)$ aider --model ollama/qwen3-coder:30b --no-show-model-warnings
-────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
-Aider v0.86.2
-Model: ollama/qwen3-coder:30b with whole edit format
-Git repo: .git with 55,990 files
-Warning: For large repos, consider using --subtree-only and .aiderignore
-See: https://aider.chat/docs/faq.html#can-i-use-aider-in-a-large-mono-repo
-Repo-map: using 4096 tokens, auto refresh
-────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
->  
 ```
-Note, aider warns that `qwen3-coder:30b` is unknown to it, but fine to use anyway.
+![Aider](pics/aider.png)
+
+Note, aider warns that `qwen3-coder:30b` is unknown to it, but fine to use anyway.  
+list of commands: https://aider.chat/docs/usage/commands.html
 
 - Use '!' to do shell commands, e.g. `!ls -l` or `!pwd`
 - Go through the code interactively, add files / folders (sub-section of codes) 
 - `/add <file>` add files to the context
+- `/code` to implement changes
 - `/drop` drop all added files
+- `/quit` ends the program
+
+use different chet modes
+- `/chat-mode ask` for question on code and implementation, or do `/ask ...`
+- `/chat-mode code` to implement directly what is described, or `/code ...`
+- `/chat-mode help` for help, or `/help ...`
+- `/chat-mode architect` to discuss architecture, or `/architect ...`
+
+
+# Application: AutoGPT
+- fully local
+- Ollama only
+- no OpenAI cloud
+- Docker-based (recommended)
+### AutoGPT installation
+ref: https://github.com/Significant-Gravitas/AutoGPT
+poetry is yet-another python package manager, so I install it globally
+```
+$ sudo apt update
+$ sudo apt install -y python3-poetry
+$ sudo apt install nodejs npm
+```
+AutoGPT installation
+```
+$ sudo mkdir /opt/autogpt && chown $(id -u):$(id -g) /opt/autogpt
+$ cd /opt/autogpt
+$ curl -fsSL https://setup.agpt.co/install.sh -o install.sh && bash install.sh
+```
+
+Note, here the frontend uses http://localhost:3000, which I already have occupied,
+so search for docker-compose.platform.yml and find the frontend section, there set
+```
+   ports:
+     3001:3000
+```
+Then proceed the installation and expect the frontend at http://localhost:3001  
+
+
+### AutoGPT Usage
+ref: https://agpt.co/docs/platform/getting-started/getting-started  
+All commands should be run in: `/opt/autogpt/AutoGPT/autogpt_platform`  
+
+star the setup
+```
+$ cd /opt/autogpt/AutoGPT/autogpt_platform
+$ docker compose up -d
+```
+![AutoGPT docker](pics/autogpt01.png)
+
+stop the entire setup
+```
+$ cd /opt/autogpt/AutoGPT/autogpt_platform
+$ docker compose down
+```
+
+
+
+
+```
+$ cd AutoGPT/classic/forge/
+$ ./run agent create your_agent_name
+```
+e.g.
+```
+$ cd AutoGPT/classic/forge/
+$ ./run agent create spock
+```
+list available agents
+```
+$ ./run agent list
+```
+
+-> **AutoGPT web frontend** can be found at http://localhost:3001
 
 # Miscellaneous
 ## WebUI Configuration
@@ -309,21 +378,22 @@ stability:
 - Parallel Requests: 1 (check in log)
 - Streaming: ON
 
-## Sitting behind a firewall
+## Remote and Firewall
 The OLLAMA server can be accessed within the LAN, also VPN tunneled connects
 work but in case need some forwarding setup.
 
 In case tunnel the needed ports out, then on the client the following needs to
 stay open:
 ```
-$ ssh -N   -L 3000:<OLLAMA server IP>:3000   -L 11434:<OLLAMA server IP>:11434 user@<tunnel peer endpoint>
+$ ssh -N   -L <port on local>:<OLLAMA server IP>:<port on remote>   <username>@<tunnel peer endpoint IP>
 ```
 e.g the server is in a LAN having the IP 192.168.1.77/24, connecting to some
 server (having forwarding, MASQUERADING and routing set), which is VPN endpoint
-with IP, say, 192.168.7.3. Then the command on the local PC connecting to this
-server remotely is
+with IP, say, 192.168.7.3. Multiple ports can be added this way.
+
+Then a command on the local PC connecting to this server remotely is
 ```
-$ ssh -N   -L 3000:192.168.1.77:3000   -L 11434:192.168.1.77:11434   user@192.168.7.3
+$ ssh -N   -L 3010:192.168.1.77:3000   -L 3011:192.168.1.77:3001   -L 11434:192.168.1.77:11434   user@192.168.7.3
 ```
 
 verify OLLAMA is accessible
