@@ -1,7 +1,7 @@
-# Lothar's Poor Man's AI Setup
-- All local
-- All free
-- All Semi-autonomous
+# Lothar's Little AI Setup
+- **All local**
+- **All free**
+- **All independent**
 
 ## Objective
 
@@ -137,7 +137,7 @@ $ docker start ollama-webui
 
 -> **WebUI** is reachable in browser: http://localhost:3000
 
-# Application: Neovim
+# Application: Neovim (integration)
 ### Neovim configuration
 setup config (in case paste with SHIFT+CTRL+v)
 - install lazy.nvim plugin manager
@@ -198,8 +198,8 @@ type `:` opens `:'<,'>` then type `Gen`, ENTER
 - select `1` for `Ask`
 - type: `explain this code`
 
-# Application: Aider
-Setup semi-autonomous AI-agent tool.
+# Application: Aider (semi-autonomous)
+Setup semi-autonomous AI-agent tool to refactor, check, bugfix, verify.
 
 ### Install Aider setup
 ```
@@ -246,11 +246,8 @@ use different chet modes
 - `/chat-mode architect` to discuss architecture, or `/architect ...`
 
 
-# Application: AutoGPT
-- fully local
-- Ollama only
-- no OpenAI cloud
-- Docker-based (recommended)
+# Application: AutoGPT (autonomous agent)
+Autonomous agent builder (WIP)  
 ### AutoGPT installation
 ref: https://github.com/Significant-Gravitas/AutoGPT
 poetry is yet-another python package manager, so I install it globally
