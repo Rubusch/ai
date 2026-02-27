@@ -39,6 +39,7 @@ $ sudo apt install -y nvidia-container-toolkit
 $ sudo nvidia-ctk runtime configure --runtime=docker                            
 $ sudo systemctl restart docker
 ```
+![Nvidia](pics/nvidia.png)
 
 ### NVIDIA docker integration
 ```
