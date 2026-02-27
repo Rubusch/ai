@@ -417,3 +417,56 @@ see if the container is around, in case remove it before rebuilding
 $ docker rm ollama-webui
 $ docker build -t ollama-webui .
 ```
+
+## Troubleshooting: Login Reset for AutoGPT
+```
+$  docker compose up -d
+[+] Running 16/16
+ ✔ Network app-network                               Created                                                                                  0.4s 
+ ✔ Network shared-network                            Created                                                                                  0.3s 
+ ✔ Container autogpt_platform-clamav-1               Started                                                                                  6.4s 
+ ✔ Container supabase-db                             Healthy                                                                                 28.9s 
+ ✔ Container supabase-kong                           Started                                                                                  6.5s 
+ ✔ Container autogpt_platform-redis-1                Healthy                                                                                 28.9s 
+ ✔ Container rabbitmq                                Healthy                                                                                 28.9s 
+ ✔ Container autogpt_platform-migrate-1              Exited                                                                                  27.7s 
+ ✔ Container supabase-auth                           Started                                                                                 12.9s 
+ ✔ Container autogpt_platform-frontend-1             Started                                                                                 26.2s 
+ ✔ Container autogpt_platform-database_manager-1     Started                                                                                 26.3s 
+ ✔ Container autogpt_platform-rest_server-1          Started                                                                                 25.7s 
+ ✔ Container autogpt_platform-executor-1             Started                                                                                 28.9s 
+ ✔ Container autogpt_platform-scheduler_server-1     Started                                                                                 28.9s 
+ ✔ Container autogpt_platform-websocket_server-1     Started                                                                                 28.6s 
+ ✔ Container autogpt_platform-notification_server-1  Started   
+```
+First generate a hash of a simple password
+```
+$ python3 -c "import bcrypt; print(bcrypt.hashpw(b'NewPassword123', bcrypt.gensalt()).decode())"
+$2b$12$B.uv5NU/0MiNmTxuOKdYCuCT/RZtY6.yig386uR1UtmUciCQ/NMYC
+```
+Check out the database container, usually this will be postgre, just set up some SQL queries to list up users, then set a new password
+```
+$ docker ps | grep supabase-db
+d6ba228e135f   supabase/postgres:15.8.1.049           "docker-entrypoint.s…"    10 minutes ago   Up 10 minutes (healthy)   0.0.0.0:5432->5432/tcp, :::5432->5432/tcp                                                                                                             supabase-db
+
+$ docker exec -it d6ba228e135f psql -U postgres
+psql (15.8)
+Type "help" for help.
+
+postgres=> SELECT id, email FROM auth.users;
+                  id                  |          email           
+--------------------------------------+--------------------------
+ dd258e6c-f478-48e5-804d-a52edc6f3af4 | kirk@enterprise.com
+ d7ac351b-afa1-48ea-a56e-9454bc6583ac | l.rubusch@protonmail.com
+(2 rows)
+
+postgres=> UPDATE auth.users
+postgres-> SET encrypted_password = '$2b$12$B.uv5NU/0MiNmTxuOKdYCuCT/RZtY6.yig386uR1UtmUciCQ/NMYC'
+postgres-> WHERE email = 'kirk@enterprise.com';
+UPDATE 1
+postgres=> exit
+```
+Then restart the backend container
+```
+docker restart autogpt_platform-rest_server-1
+```
