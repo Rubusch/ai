@@ -69,7 +69,7 @@ $ cd ./01_docker-ollama/
 ```
 01$ docker run -d --name ollama --network ollama-net -p 11434:11434 -v ollama-data:/root/.ollama ollama-local
 ```
-In case remove a stale container (when re-started, but no network)
+In case remove a stale container (removes also chat history)
 ```
 $ docker rm -f ollama
 ```
@@ -86,19 +86,48 @@ List installed LLMs
 ```
 $ docker start ollama
 $ docker exec ollama ollama list
-NAME                       ID              SIZE      MODIFIED    
-    mistral:7b                 6577803aa9a0    4.4 GB    2 weeks ago    
-    DevStral-Small-2:latest    24277f07f62d    15 GB     5 weeks ago    
-    qwen3-coder:30b            06c1097efce0    18 GB     5 weeks ago    
-    qwen3:14b                  bdbd181c33f2    9.3 GB    5 weeks ago
+    NAME                    ID              SIZE      MODIFIED
+    cogito:32b              0b4aab772f57    19 GB     About an hour ago
+    cogito:14b              d0cac86a2347    9.0 GB    2 hours ago
+    mistral-small3.2:24b    5a408ab55df5    15 GB     4 hours ago
+    mistral:7b              6577803aa9a0    4.4 GB    2 weeks ago
+    qwen3-coder:30b         06c1097efce0    18 GB     5 weeks ago
 ```
 Install LLM, note the in some cases billion params needs to be specified, e.g.
 `qwen3:14b` or `qwen3-coder:30b`. Note, OLLAMA takes care of quantization, so in
 case of this system 30 billion params are actually too much, anyway, OLLAMA
 downloads the quantized version (if available), anyway it occupies 18GB disk
 space.
+
+### Higher paremetrization vs higher quantization
+
+Quantization trades numerical precision for memory savings.
+Effect:
+- Slightly worse reasoning stability
+- Slightly higher hallucination rate
+- Slightly weaker long-chain logic
+- Usually still better than a smaller full-precision 7b model
+
+So the real question is not "is it quantized?" -  The question is: Does a 24b quantized model outperform an 8b full model for your
+particular use case?   
+
+The 24b class model will:
+- track multi-layer context better
+- reason about people with more nuance
+- produce less shallow advice
+- handle longer structured planning
+
+The tradeoff with a localized system will be:
+- run close to VRAM limit
+- possibly see slower token generation
+- maybe experience small quality degradation vs full precision
+
 ```
 $ docker exec -it ollama ollama pull qwen3-coder
+```
+or remove a model
+```
+$ docker exec -it ollama ollama rm qwen3:14b
 ```
 The new model should appear in the above list. From webui, use the Model
 Selector Dropdown to select a model. Or, re-run the docker command to build it
@@ -289,7 +318,7 @@ $ cd /opt/autogpt/AutoGPT/autogpt_platform
 $ docker compose down
 ```
 
-
+TODO
 
 
 ```
@@ -329,17 +358,62 @@ $ ollama create qwen3-coder-cpp -f Modelfile
 ```
 This is not training. It’s configuration.
 
-## Ollama Fine-Training
-Real fine-tuning workflow (correct one)
+## Ollama Tuning
 
-1. Fine-tune externally using:
- - HuggingFace + PEFT
- - QLoRA / LoRA
-2. Export: GGUF or compatible format
-3. Import into Ollama:
-```
-$ ollama create my-qwen -f Modelfile
-```
+Possibilities of focussing a LLM on a particular task and context are:
+1. Continue Pretraining
+  - a huge dataset, i.e. huge amount of GPUs
+  - for local setup unrealistic
+
+2. Full Fine-Tuning (all weights change)
+  - for 30B models equally unrealistic
+
+3. Parameter-efficient fine-tuning (LoRA / QLoRA)
+  - realistic for local setups
+  - Retrieval-Augmented Generation (RAG)
+
+### Retrieval-Augmented Generation (RAG)
+A kind of pre-indexing for a particular context or subsystem in a huge source-tree, e.g. specialize for a sub-system of the linux
+kernel.
+
+Example:
+1. Parse the kernel tree: Prepare the codebase for semantic indexing.
+2. Split code into meaningful chunks
+    - One function per chunk (ideal)
+    - Or 200–400 lines
+    - Never cut in the middle of a function
+    - Keep related structs + helpers together
+3. Generate embeddings, use a dedicated embedding model, e.g.:
+    - nomic-embed-text
+    - mxbai-embed-large
+   For each chunk:
+    - Send chunk to embedding model
+    - Receive numeric vector
+    - Store it
+4. Store in a vector database, use something lightweight:
+    - FAISS
+    - Qdrant
+    - Chroma
+   Each entry contains:
+   - Vector
+   - Original text chunk
+   - File path
+   Optional metadata (kernel version, commit hash), this is your semantic index. Save it to disk.
+5. This pre-index will be called with each prompt before passing it to the LLM, so the pre-index access will need som scripted
+   frontend addition to e.g. Aider. Then the Input on the Aider shell implicitely search the pre-index, come up with the resulting
+   vectors and evalute them with the LLM, which reduces hallucinations and results in a more focuessed result for the general coding
+   cases in the particular subsystem. Not covered are maintainer policies, architectural stratgies, and edge cases.
+
+There is no reliable benchmark.
+- RAG can significantly reduce hallucinations
+- it can also inject irrelevant context
+- it is overkill for small tasks
+
+Realistically (also AI estimation!):
+- Subsystem-level work -> +30 - 70% precision (subjective estimate)
+- Simple coding tasks -> barely any difference
+
+TODO scripts added to this repo
 
 ## Commands and Usage 
 cleanup
