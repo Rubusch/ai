@@ -239,7 +239,7 @@ $ . ./aider-venv/bin/activate
 (aider-venv)$ pip install --upgrade pip setuptools wheel
 (aider-venv)$ pip install aider-install
 (aider-venv)$ aider-install
-(aider-venv)$ $ aider --version
+(aider-venv)$ aider --version
     aider 0.86.2
 ```
 
