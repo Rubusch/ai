@@ -62,8 +62,8 @@ First usage:
 ```
 $ cd ./01_docker-ollama/
 01$ docker build -t ollama-local .
-01$ docker network create ollama-net
-01$ docker run -d --name ollama --network ollama-net --gpus all -p 11434:11434 -v ollama-data:/root/.ollama ollama-local
+01$ docker network create --driver bridge --subnet 172.20.0.0/16 ollama-net
+01$ run -d --name ollama --network ollama-net --gpus all --shm-size=32g -e OLLAMA_GPU_OVERHEAD=1024 -e OLLAMA_NUM_PARALLEL=1 -e OLLAMA_CONTEXT_LENGTH=8192 -p 11434:11434 -v ollama-data:/root/.ollama ollama-local
 ```
 (opt) Alternatively, do the CPU only version
 ```
@@ -156,8 +156,9 @@ First usage:
 ```
 $ cd ./02_docker-webui/
 02$ $ docker build -t ollama-webui .
-02$ docker run -d --name ollama-webui --network ollama-net -p 3000:8080 -e OLLAMA_BASE_URL=http://ollama:11434 ollama-webui
+02$ docker run -d --name ollama-webui --network ollama-net -p 3000:8080 -e OLLAMA_BASE_URL=http://ollama:11434 -v open-webui:/app/backend/data ollama-webui
 ```
+Use a volume for persistent history.
 ### Start WebUI Container
 ```
 $ docker start ollama-webui
@@ -449,6 +450,15 @@ configure:
 stability:
 - Parallel Requests: 1 (check in log)
 - Streaming: ON
+
+### Note: for 2 RTX cards
+```
+01$ docker stop ollama
+01$ docker rm ollama
+01$ docker run -d --name ollama --network ollama-net --gpus all --shm-size=32g -e OLLAMA_GPU_OVERHEAD=512 -e OLLAMA_NUM_PARALLEL=1 -e OLLAMA_CONTEXT_LENGTH=8192 -e OLLAMA_SCHED_SPREAD=1 -p 11434:11434 -v ollama-data:/root/.ollama ollama-local
+01$ docker start ollama
+```
+should not have lost any data
 
 ## Remote and Firewall
 The OLLAMA server can be accessed within the LAN, also VPN tunneled connects
