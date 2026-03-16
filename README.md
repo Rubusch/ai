@@ -373,6 +373,33 @@ Possibilities of focussing a LLM on a particular task and context are:
   - realistic for local setups
   - Retrieval-Augmented Generation (RAG)
 
+### Modelfile: specific for a particular LLM
+
+Find the Modelfile (similar syntax for other LLMs). Here is an example for qwen3-coder-next:latest
+```
+$ docker run -d --name ollama --network ollama-net --gpus all --shm-size=32g \
+	-e OLLAMA_GPU_OVERHEAD=512 \
+	-e OLLAMA_NUM_PARALLEL=1 \
+	-e OLLAMA_CONTEXT_LENGTH=32768 \
+	-e OLLAMA_SCHED_SPREAD=1 \
+	-e OLLAMA_MAX_LOADED_MODELS=1 \
+	-p 11434:11434 \
+	-v ollama-data:/root/.ollama ollama-local
+
+    1503071a4f160bf24786d5c7ad5b3e1e921d580c858ae6aa4c2ce632f09d4c7a
+
+$ docker cp Modelfile ollama:/root/Modelfile
+    Successfully copied 2.56kB to ollama:/root/Modelfile
+
+$ docker exec -it ollama ollama create qwen3-coder-32k -f /root/Modelfile
+    gathering model components 
+    using existing layer sha256:30e51a7cb1cf1333b9e298b90b4c7790fe2572d8736b002482a0ac96328a2ffb 
+    using existing layer sha256:7339fa418c9ad3e8e12e74ad0fd26a9cc4be8703f9c110728a992b193be85cb2 
+    creating new layer sha256:7c4606d08e6e59c799e29711b3f106183a5fb63f5c07362629b793b1cbe5f34c 
+    writing manifest 
+    success 
+```
+
 ### Retrieval-Augmented Generation (RAG)
 A kind of pre-indexing for a particular context or subsystem in a huge source-tree, e.g. specialize for a sub-system of the linux
 kernel.
@@ -440,7 +467,7 @@ then in 02 start the webUI
 02$ docker run -d --name ollama-webui --network ollama-net -p 3000:8080 -e OLLAMA_BASE_URL=http://ollama:11434 ollama-webui
 ```
 configure:
-- Context Length: 6144 (check this in the log)
+- Context Length: check this in the log
 - `Max Tokens`: 10000 
 - `Temperature`: 0.2 – 0.3
 - `Top_p`: 0.9

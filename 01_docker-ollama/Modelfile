@@ -1,0 +1,27 @@
+## usage:
+## $ docker cp Modelfile ollama:/root/Modelfile
+## $ docker exec -it ollama ollama create qwen3-coder-32k -f /root/Modelfile
+
+# Base model to inherit from
+FROM qwen3-coder-next:latest
+
+# --- Memory and Context Settings ---
+# Set the context window to 32k tokens. 
+# This requires several GBs of additional RAM/VRAM for the KV cache.
+PARAMETER num_ctx 32768
+
+# --- GPU Offloading ---
+# Set to 99 to instruct Ollama to offload as many layers as possible to your 2x RTX 4000 (40GB total).
+# Since the model is ~70-80GB, the remaining layers will automatically spill over into your 128GB system RAM.
+PARAMETER num_gpu 99
+
+# --- Generation Parameters ---
+# Standard temperature for coding tasks to balance creativity and precision.
+PARAMETER temperature 0.2
+
+# Helps prevent the model from getting stuck in repetitive loops.
+PARAMETER repeat_penalty 1.1
+
+# --- Performance Tuning ---
+# Defines how many tokens to keep from the previous prompt when the context overflows.
+PARAMETER num_keep 24
